@@ -2,12 +2,47 @@ import networkx as nx
 from matplotlib import pyplot as plt
 from networkx.drawing.nx_agraph import graphviz_layout
 
+
 graph = nx.DiGraph()
 
-Dict = {1: "sample sentece one.", 2: "sample sentence 2.", 3: "sample sentence three.", 4: "sample sentence four."}
-graph.add_edges_from([(1, 2), (1, 3),
-	(1, 4), (2, 3), (2, 4), (3, 4)], weight=10)
+#Dict = {1: "sample sentece one.", 2: "sample sentence 2.", 3: "sample sentence three.", 4: "sample sentence four."}
+
+def maketuples():
+    myfile = open("input.txt", "r")
+    content = myfile.read()
+    myfile.close()
+
+    content_list = content.split(".")
+    # seems to create an empty string
+    content_list = content_list[:len(content_list) - 1]
+
+    dicts = {}
+    keys = range(len(content_list))
+    for i in keys:
+        dicts[i] = content_list[i]
+
+    #print(dicts)
+
+    # generate a list of tuples
+    list = [*range(0, len(content_list))]
+    res = []
+    for i in list:
+        temp = list[i + 1:]
+        for j in temp:
+            res.append((i, j))
+            j = j + 1
+        i = i + 1
+
+    return (res)
+
+
+e = maketuples()
+graph.add_edges_from(e, weight=11)
+
+
+#graph.add_edges_from([(1, 2), (1, 3), (1, 4), (2, 3), (2, 4), (3, 4)], weight=10)
 pos = nx.spring_layout(graph, seed=7)
+
 # plt.tight_layout()
 # nx.draw_networkx_nodes(graph, pos, node_size=700)
 # nx.draw_networkx_edges(graph, pos, width=6)
@@ -17,7 +52,7 @@ nx.draw_networkx(graph, pos,arrows=False)
 plt.show()
 # plt.savefig("g.png", format="PNG")
 plt.clf()
-print(Dict)
+
 
 
 
