@@ -10,5 +10,5 @@ Tina:
 
 Ala:
 1. Fix the runtime EA error
-2. Create a mutuation function 
+2. Create a mutation function 
 3. Create a crossover function 
