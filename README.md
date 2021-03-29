@@ -1,4 +1,4 @@
-# EALP
+
 Language Processing: Text Summarization
 
 1. Use an adjacency matrix instead of networkX
