@@ -1,14 +1,6 @@
 # EALP
-Evolutionary Algorithms: Language Processing
+Language Processing: Text Summarization
 
-Tina:
-1. Lemmatization and stopword removal in calculating edge weights using nltk python package
-2. Create a larger txt file with more realistic txt
-3. Normalization of edge weights
-
-
-
-Ala:
-1. Fix the runtime EA error
-2. Create a mutation function 
-3. Create a crossover function 
+1. Use an adjacency matrix instead of networkX
+2. make all edges undirected
+3. change the encoding of a summary from an array of 1s and 0s to an array of indices
