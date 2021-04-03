@@ -1,4 +1,4 @@
-# dag.py 1.0.3
+# dag.py 1.0.4
 
 import numpy as np
 import sys
@@ -13,7 +13,16 @@ from nltk.stem import WordNetLemmatizer
 from nltk.corpus import stopwords
 from nltk.tokenize import word_tokenize
 
-myfile = open("input2.txt", "r")
+comparison = {'similarily', 'likewise', 'also', 'comparison'}
+reason = {'cause', 'reason'}
+result = {'result', 'consequence', 'therefore', 'thus','consequently', 'hence'}
+contrast = {'however', 'on the other hand', 'on the contrary', 'contrast'}
+sequential = {'Firstly', 'secondly', 'thirdly', 'next','last', 'finally', 'in addition', 'furthermore', 'also'}
+order_of_importance = {'most', 'more', 'importantly', 'significantly','above', 'all', 'primarily', 'essential'}
+
+
+
+myfile = open("input3.txt", "r")
 content = myfile.read()
 myfile.close()
 
@@ -32,8 +41,6 @@ final_sentence= ' '.join(filtered_sentence)
 
 list_of_sentences = [sentence for sentence in final_sentence.split(".") if len(sentence) > 0]
 
-total = [i for i in range(len(list_of_sentences))]
-
 
 
 def summary_matrix(summary):
@@ -48,10 +55,7 @@ def summary_matrix(summary):
 		set_of_words = {word for word in sentence.split()}
 		sentence_size = len(set_of_words)
 		for j in summary:
-			if j < i:
-				row.append(0)
-				continue
-			elif j == i:
+			if j == i:
 				row.append(1)
 				continue
 
@@ -72,123 +76,113 @@ def summary_matrix(summary):
 
 
 
-
-max_matrix = summary_matrix(total)
-
-print(max_matrix)
-print(max_matrix[2, 3])
+zero_to_n = [i for i in range(len(list_of_sentences))]
+max_matrix = summary_matrix(zero_to_n)
 
 
-print(summary_matrix([0,3,5,6]))
-sys.exit()
 
+
+
+### GA optimizer ###
  
-def function(summary):
-	row_numbers = [-1]
-	for x in summary:
-		row_numbers.append(x)
-	matrix = np.array(row_numbers)
-
-
+def fitness_function(summary):
 	total = 0
-	start_sentence = 0
-	end_sentence = 1
-	while  end_sentence < len(summary):
-		total+= matrix[start_sentence+1, end_sentence+1]
-		start_sentence+=1
-		end_sentence+=1
+	matrix = summary_matrix(summary)
+	matrix = matrix[1:]
+	for row in matrix:
+			total+=np.sum(row[1:])
 
 	return total
 
  
-# tournament selection
-def selection(population, scores, k=3):
-	# first random selection
-	selection_ix = randint(len(population))
-	for ix in randint(0, len(population), k-1):
-		# check if better (e.g. perform a tournament)
-		if scores[ix] > scores[selection_ix]:
-			selection_ix = ix
-	return population[selection_ix]
+
  
- 
-# mutation operator
 def mutation(summary, r_mut, doc_length):
 	num_sentences_to_change = max(int(r_mut*len(summary)),1)
+	mutated_summary = []
+	for x in summary:
+		mutated_summary.append(x)
 
-	lowest_edge_weight = 1
-	lowest_edge_weight_vertices = (0,0)
-	start_sentence = 0
-	end_sentence = 1
-	while  end_sentence < len(summary):
-		weight = matrix[start_sentence+1, end_sentence+1]
-		if weight < lowest_edge_weight:
-			lowest_edge_weight = weight
-			lowest_edge_weight_vertices = (start_sentence,end_sentence)
-		start_sentence+=1
-		end_sentence+=1
+	sentenceID_sum_tuple = []
 
-	summary.remove(lowest_edge_weight_vertices[-1])
-	summary.add(randint(0, doc_length))
+	matrix = summary_matrix(summary)
+	matrix = matrix[1:]
+	for row in matrix:
+		row_sum =np.sum(row[1:])
+		sentenceID_sum_tuple.append((row[0], row_sum))
+
+	sentenceID_sum_tuple.sort(key = lambda x: x[1])
+
+	sentenceID_sum_tuple = sentenceID_sum_tuple[0:num_sentences_to_change]
+
+	for tup in sentenceID_sum_tuple:
+		mutated_summary.remove(tup[0])
+
+
+	while len(mutated_summary) < len(summary):
+		sample_index = random.randint(0, doc_length-1)
+		if sample_index not in mutated_summary:
+			mutated_summary.append(sample_index) 
+
+
+	return sorted(mutated_summary)
 
 
 
-	for i in range(len(summary)):
-		# check for a mutation
-		if rand() < r_mut:
-			# flip the bit
-			summary[i] = 1 - summary[i]
- 
-
-def genetic_algorithm(function, doc_length, summary_length, number_of_iterations, population_size, r_cross, r_mut):
+def genetic_algorithm(function, doc_length, summary_length, number_of_iterations, population_size, r_cross, mutation_coefficient, selection_rate):
 
 	
 	population = []
+
 	for _ in range(population_size):
 		summary = set()
-		i = 0
-		while i < summary_length:
-			sample_index = randint(0, doc_length)
+		while len(summary) < summary_length:
+			sample_index = random.randint(0, doc_length-1)
 			if sample_index not in summary:
 				summary.add(sample_index)
-			else:
-				i-=1
-			i+=1
+
+
 		population.append(sorted(summary))
 
-	print(population)
+
 
 	best_summary, best_score = 0, 0
 	for gen in range(number_of_iterations):
 
-		scores = [function(p) for p in population]
+		scores = [fitness_function(p) for p in population]
 		for i in range(population_size):
 			if scores[i] > best_score:
 				best_summary, best_score = population[i], scores[i]
 				print(">%d, new best f(%s) = %f" % (gen,  best_summary, best_score))
 
-		# select parents
-		selected = [selection(population, scores) for _ in range(population_size)]
-		# create the next generation
-		children = list()
-		for i in range(0, population_size, 2):
-			# get selected parents in pairs
-			p1, p2 = selected[i], selected[i+1]
-			# crossover and mutation
-			# for c in crossover(p1, p2, r_cross):
-			# 	# mutation
-			# 	mutation(c, r_mut)
-			# 	# store for next generation
-			# 	children.append(c)
+
+		selected = []
+		while len(selected) < population_size*selection_rate:
+			top_score = max(scores)
+			index = scores.index(top_score)
+			selected.append(population[index])
+			del population[index]
+			del scores[index]
 
 
+		children = []
+		for x in selected:
+			children.append(x)
+		for summary in selected:
+			children.append(mutation(summary,mutation_coefficient,doc_length))
 			
+
+		
+		
 		population = children
 	return [best_summary, best_score]
+
+
+### GA optimizer ###
  
 
 
-doc_length = len(matrix)-1
+doc_length = len(max_matrix)-1
 
 summary_length = 5
 
@@ -200,8 +194,16 @@ r_cross = 0.9
 
 mutation_coefficient = .1
 
+selection_rate = .5
 
-best, score = genetic_algorithm(function, doc_length, summary_length, num_iterations, population_size, r_cross, mutation_coefficient)
+
+best, score = genetic_algorithm(fitness_function, doc_length, summary_length, num_iterations, population_size, r_cross, mutation_coefficient, selection_rate)
 print('Done!')
 print('f(%s) = %f' % (best, score))
+
+
+for index in best:
+	print(index)
+	print(list_of_sentences[index])
+
 
