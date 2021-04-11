@@ -1,10 +1,11 @@
-# main.py 1.0.5
+# main.py 1.0.6
 
 import numpy as np
 import sys
 import random
 import ea
 
+from termcolor import colored
 import nltk
 # nltk.download('stopwords')
 # nltk.download('punkt')
@@ -17,7 +18,7 @@ comparison = {'similarily', 'likewise', 'also', 'comparison'}
 reason = {'cause', 'reason'}
 result = {'result', 'consequence', 'therefore', 'thus','consequently', 'hence'}
 contrast = {'however', 'on the other hand', 'on the contrary', 'contrast'}
-sequential = {'Firstly', 'secondly', 'thirdly', 'next','last', 'finally', 'in addition', 'furthermore', 'also'}
+sequential = {'Firstly', 'secondly', 'thirdly', 'next','last', 'finally', 'in addition', 'furthermore', 'also','before', }
 order_of_importance = {'most', 'more', 'importantly', 'significantly','above', 'all', 'primarily', 'essential'}
 
 
@@ -28,7 +29,11 @@ myfile.close()
 
 
 ## removing stop words and Lemmatization
-stop_words=set(['a', 'about', 'above', 'after', 'again', 'against',        'all', 'am', 'an', 'and', 'any', 'are',                   'as', 'at', 'be', 'because', 'been', 'before', 'being', 'below', 'between', 'both', 'but', 'by',        'could',                            'did',                   'do', 'does',                     'doing',                 'down', 'during', 'each', 'few', 'for', 'from', 'further', 'had',                   'has',                   'have',                     'having', 'he', "he'd", "he'll", "he's", 'her', 'here', "here's", 'hers', 'herself', 'him', 'himself', 'his', 'how', "how's", 'i', "i'd", "i'll", "i'm", "i've", 'if', 'in', 'into', 'is',                 'it', "it's", 'its', 'itself', "let's",                 'me',                       'more', 'most',                     'my', 'myself',                           'nor',                    'of',        'on', 'once', 'only', 'or', 'other', 'ought', 'our', 'ours', 'ourselves', 'out', 'over', 'own',            'same',                   'she', "she'd", "she'll", "she's", 'should',                                      'so', 'some', 'such',      'than', 'that',            "that's", 'the', 'their', 'theirs', 'them', 'themselves', 'then', 'there', "there's", 'these', 'they', "they'd", "they'll", "they're", "they've", 'this', 'those', 'through', 'to', 'too', 'under', 'until', 'up',       'very', 'was',                   'we', "we'd", "we'll", "we're", "we've", 'were',                     'what', "what's", 'when', "when's", 'where', "where's", 'which', 'while', 'who', "who's", 'whom', 'why',         "why's", 'with',                 'would',                            'you', "you'd", "you'll", "you're", "you've", 'your', 'yours', 'yourself', 'yourselves'])
+stop_words=set(['a', 'about', 'above', 'after', 'again', 'against',
+	'all', 'am', 'an', 'and', 'any', 'are',
+	'as', 'at', 'be', 'because', 'been', 'before', 'being', 'below', 'between', 'both', 'but', 'by',
+	'could', 'did','do', 'does','doing','down', 'during', 'each', 'few', 'for', 'from', 'further', 'had','has','have','having', 'he', "he'd", "he'll", "he's", 'her', 'here', "here's", 'hers', 'herself', 'him', 'himself', 'his', 'how', "how's", 'i', "i'd", "i'll", "i'm", "i've", 'if', 'in', 'into', 'is',
+	 'it', "it's", 'its', 'itself', "let's",'me','more', 'most','my', 'myself','nor','of','on', 'once', 'only', 'or', 'other', 'ought', 'our', 'ours', 'ourselves', 'out', 'over', 'own','same','she', "she'd", "she'll", "she's", 'should',                                      'so', 'some', 'such',      'than', 'that',            "that's", 'the', 'their', 'theirs', 'them', 'themselves', 'then', 'there', "there's", 'these', 'they', "they'd", "they'll", "they're", "they've", 'this', 'those', 'through', 'to', 'too', 'under', 'until', 'up',       'very', 'was',                   'we', "we'd", "we'll", "we're", "we've", 'were',                     'what', "what's", 'when', "when's", 'where', "where's", 'which', 'while', 'who', "who's", 'whom', 'why',         "why's", 'with',                 'would',                            'you', "you'd", "you'll", "you're", "you've", 'your', 'yours', 'yourself', 'yourselves'])
 
 #word_list = [word for word in content.split(" ") if len(word) > 0]
 ## still using word_tokens, due to differences in treatment of comma
@@ -138,8 +143,10 @@ print('best summary: %s \ncohesion score: %f' % (best, score))
 ## want stopwords here
 list_of_sentences_with_stopwords = [sentence for sentence in content.split(".") if len(sentence) > 0]
 
+print(colored('hello', 'red'), colored('world', 'green'))
+
 for index in best:
- 	print(index)
- 	print(list_of_sentences_with_stopwords[index])
+ 	print(' ['+str(index)+'] ', end='')
+ 	print(list_of_sentences_with_stopwords[index], end='.')
 
 
