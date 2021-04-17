@@ -4,15 +4,13 @@ import numpy as np
 import sys
 import random
 import ea
-
-from termcolor import colored
+import fitz
+#from termcolor import colored
 import nltk
-# nltk.download('stopwords')
-# nltk.download('punkt')
-# nltk.download('wordnet')
+
 from nltk.stem import WordNetLemmatizer
-#from nltk.corpus import stopwords
 from nltk.tokenize import word_tokenize
+
 ##list of logical words
 comparison = {'similarily', 'likewise', 'also', 'comparison'}
 reason = {'cause', 'reason'}
@@ -23,10 +21,12 @@ order_of_importance = {'most', 'more', 'importantly', 'significantly','above', '
 
 
 
-myfile = open("input3.txt", "r")
-content = myfile.read()
-myfile.close()
 
+doc = fitz.open("first_two_pages.pdf")
+content = ""
+for page in doc:
+	text = page.get_text('text')
+	content += text
 
 ## removing stop words and Lemmatization
 stop_words=set(['a', 'about', 'above', 'after', 'again', 'against',
@@ -35,7 +35,6 @@ stop_words=set(['a', 'about', 'above', 'after', 'again', 'against',
 	'could', 'did','do', 'does','doing','down', 'during', 'each', 'few', 'for', 'from', 'further', 'had','has','have','having', 'he', "he'd", "he'll", "he's", 'her', 'here', "here's", 'hers', 'herself', 'him', 'himself', 'his', 'how', "how's", 'i', "i'd", "i'll", "i'm", "i've", 'if', 'in', 'into', 'is',
 	 'it', "it's", 'its', 'itself', "let's",'me','more', 'most','my', 'myself','nor','of','on', 'once', 'only', 'or', 'other', 'ought', 'our', 'ours', 'ourselves', 'out', 'over', 'own','same','she', "she'd", "she'll", "she's", 'should',                                      'so', 'some', 'such',      'than', 'that',            "that's", 'the', 'their', 'theirs', 'them', 'themselves', 'then', 'there', "there's", 'these', 'they', "they'd", "they'll", "they're", "they've", 'this', 'those', 'through', 'to', 'too', 'under', 'until', 'up',       'very', 'was',                   'we', "we'd", "we'll", "we're", "we've", 'were',                     'what', "what's", 'when', "when's", 'where', "where's", 'which', 'while', 'who', "who's", 'whom', 'why',         "why's", 'with',                 'would',                            'you', "you'd", "you'll", "you're", "you've", 'your', 'yours', 'yourself', 'yourselves'])
 
-#word_list = [word for word in content.split(" ") if len(word) > 0]
 ## still using word_tokens, due to differences in treatment of comma
 word_tokens = word_tokenize(content)
 
@@ -46,13 +45,36 @@ for w in word_tokens:
 	if w.lower() not in stop_words:
 		filtered_sentence.append(lemmatizer.lemmatize(w))
 final_sentence= ' '.join(filtered_sentence)
-list_of_sentences = [sentence for sentence in final_sentence.split(".") if len(sentence) > 0]
+initial_list_of_sentences = [sentence for sentence in final_sentence.split(".") if len(sentence) > 0]
+
+
+
+extra_information= {"content downloaded", "http", "/", "Vol", "©"}
+
+
+list_of_sentences = []
+
+for sentence in range(len(initial_list_of_sentences)):
+	flag = True;
+	word_list = initial_list_of_sentences[sentence].split()
+	number_of_words = len(word_list)
+	for word in word_list:
+		if word in extra_information:
+			flag = False
+			continue
+	print(flag)
+	if number_of_words > 5 and flag == True:
+		list_of_sentences.append(initial_list_of_sentences[sentence])
+
+
+
+print(list_of_sentences)
 
 
 
 
 def retrieved_matrix(summary):
-	print(summary)
+
 	row_numbers = [-1]
 	for x in summary:
 		row_numbers.append(x)
@@ -114,11 +136,6 @@ def summary_matrix(summary):
 		matrix = np.vstack([matrix, row])
 	return matrix
 
-## make summary matrix grab form new function
-
-##print(summary_matrix([8,6,22,3,12,19]))
-
-
 
 doc_length = len(max_matrix)-1
 
@@ -136,17 +153,38 @@ selection_rate = .5
 
 
 best, score = ea.evolutionary_algorithm(summary_matrix, doc_length, summary_length, num_iterations, population_size, r_cross, mutation_coefficient, selection_rate)
-print('Done!')
-print('best summary: %s \ncohesion score: %f' % (best, score))
+#print('Done!')
+#print('best summary: %s \ncohesion score: %f' % (best, score))
 
 
 ## want stopwords here
 list_of_sentences_with_stopwords = [sentence for sentence in content.split(".") if len(sentence) > 0]
 
-print(colored('hello', 'red'), colored('world', 'green'))
+#print(colored('hello', 'red'), colored('world', 'green'))
+my_terms=[]
 
 for index in best:
- 	print(' ['+str(index)+'] ', end='')
- 	print(list_of_sentences_with_stopwords[index], end='.')
+	print(' ['+str(index)+'] ', end='')
+	print(list_of_sentences_with_stopwords[index], end='.')
+	my_terms.append(list_of_sentences_with_stopwords[index])
 
 
+
+Adversative = ["however", "nevertheless", "in fact","actually", "instead", "contrary"]
+Sequential = ["then", "next", "last", "finally", "up to now", "to sum up"]
+Causal = ["therefore", "consequently", "then", "otherwise"]
+Additive = ["in addition","moreover", "that is", "for instance"
+"likewise","similarly"]
+
+
+for x in my_terms:
+	text = x
+	for page in doc:
+		text_instances = page.searchFor(text)
+		for inst in text_instances:
+			highlight = page.addUnderlineAnnot(inst)
+
+
+
+
+doc.save("output.pdf", garbage=4, deflate=True, clean=True)
