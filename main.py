@@ -424,7 +424,7 @@ def summary_matrix(summary):
 		matrix = np.vstack([matrix, row])
 	return matrix
 
-print(summary_matrix([8,17,19,21,23]))
+#print(summary_matrix([8,17,19,21,23]))
 doc_length = len(max_matrix)-1
 
 summary_length = 5
@@ -460,6 +460,14 @@ Sequential = ["then", "next", "last", "finally", "up to now", "to sum up"]
 Causal = ["therefore", "consequently", "then", "otherwise"]
 Additive = ["in addition","moreover", "that is", "for instance"
 "likewise","similarly"]
+
+#print()
+#print(my_terms)
+
+my_terms = [w.replace('- ', '') for w in my_terms]
+my_terms = [w.replace('  ', ' ') for w in my_terms]
+
+#print(my_terms)
 
 for x in my_terms:
 	text = x
