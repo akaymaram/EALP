@@ -247,9 +247,15 @@ Additive = ["in addition","moreover", "that is", "for instance"
 lst = [comparison,reason, result, contrast, sequential, order_of_importance, Adversative, Sequential, Causal, Additive]
 union_set = set().union(*lst)
 
+#print(sys.argv[1])
+#print(sys.argv[1])
+
+
+
 while True:
-    filename = input("Please Enter Name of the File : \n")
+    #filename = input("Please Enter Name of the File : \n")
     # pdf_full.pdf
+    filename = sys.argv[1]
     try:
         doc = fitz.open(filename)
     except Exception:
@@ -394,7 +400,8 @@ def summary_matrix(summary):
 
 doc_length = len(max_matrix)-1
 
-summary_length = int(input("Please Enter Summary Length: \n"))
+#summary_length = int(input("Please Enter Summary Length: \n"))
+summary_length = int(sys.argv[2])
 num_iterations = 100
 population_size = 10
 r_cross = 0.9
