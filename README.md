@@ -1,2 +1,3 @@
 
-Language Processing: Text Summarization
+Evolutionary Algorithm: Language Porcessing
+Extrative Summarization
