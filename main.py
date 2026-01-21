@@ -6,6 +6,7 @@ import sys
 import random
 import ea
 from operator import itemgetter
+import os
 
 def fonts(doc, granularity=False):
 
@@ -250,18 +251,13 @@ union_set = set().union(*lst)
 #print(sys.argv[1])
 #print(sys.argv[1])
 
+file_path = filename = sys.argv[1]
+if not os.path.exists(file_path):
+    sys.exit(f'The file {file_path} does not exist.')
+else:
+    print(f'The file {file_path} exists.')
 
-
-while True:
-    #filename = input("Please Enter Name of the File : \n")
-    # pdf_full.pdf
-    filename = sys.argv[1]
-    try:
-        doc = fitz.open(filename)
-    except Exception:
-        print('File Not Found, Please Try Again')
-    else:
-        break
+doc = fitz.open(file_path)
 
 content = ""
 for page in doc:
